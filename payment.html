@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - Black Day Coffee</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f1d3b8;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #d23d3d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .success-message {
+            display: none;
+            margin-top: 20px;
+            color: green;
+            font-size: 18px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Payment Details</h2>
+        <form id="payment-form">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="payment-method">Payment Method:</label>
+                <select id="payment-method" required>
+                    <option value="">Select Payment Method</option>
+                    <option value="credit-card">Credit/Debit Card</option>
+                    <option value="upi">UPI</option>
+                    <option value="net-banking">Net Banking</option>
+                </select>
+            </div>
+            <button type="submit">Proceed to Payment</button>
+        </form>
+        <div class="success-message" id="success-message">
+            Payment Successful! Thank you for your purchase.
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('pk_test_51QCMSvKbbNkYspPyzFVXtlZY2MXjBmqTMr4Te7xFiKabMY3Pl4slsxAsjb0FzXRJGX5eBO7zwCJtfUgJ5Qg2Lahc00L0Mr2Tdo');
+
+        document.getElementById('payment-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const paymentMethod = document.getElementById('payment-method').value;
+            const paymentData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                paymentMethod: paymentMethod,
+            };
+
+            try {
+                const response = await fetch('/process_payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(paymentData),
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    document.getElementById('success-message').style.display = 'block';
+                } else {
+                    alert('Payment failed: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error processing payment. Please try again later.');
+            }
+        });
+        fetch('http://localhost:8080/create-checkout-session', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ 
+        name: name, 
+        email: email, 
+        phone: phone, 
+        amount: amount * 100 
+    })
+})
+
+    </script>
+</body>
+</html>
